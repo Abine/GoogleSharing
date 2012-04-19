@@ -17,14 +17,14 @@
       <Description>
         <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
         <em:minVersion>3.0</em:minVersion>
-        <em:maxVersion>5.*</em:maxVersion>
+        <em:maxVersion>13.*</em:maxVersion>
       </Description>
     </em:targetApplication>
    
     <!-- Front End MetaData -->
     <em:name>GoogleSharing</em:name>
     <em:description>Google Sharing</em:description>
-    <em:creator>Moxie Marlinspike</em:creator>
+    <em:creator>Moxie Marlinspike, Abine</em:creator>
     <em:homepageURL>http://www.googlesharing.net/</em:homepageURL>
   </Description>      
 </RDF>

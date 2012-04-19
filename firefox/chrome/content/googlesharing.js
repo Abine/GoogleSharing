@@ -206,37 +206,30 @@ var GoogleShare = {
     element.style.paddingTop    = topMargin;
     element.style.marginLeft    = leftMargin;
     element.appendChild(textNode);
-    
-    var linkNode = document.createElement("a");
-    linkNode.setAttribute("href", "https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=37GLA89S6BLJQ");
-    linkNode.appendChild(document.createTextNode("donated"));
-
-    element.appendChild(linkNode);
-    element.appendChild(document.createTextNode(" this month?"));
 
     return element;
   },
 
   addTagToMainPage: function(document, baseElement) {
-    var textNode  = document.createTextNode("Search results will be anonymized by GoogleSharing, have you ");
+    var textNode  = document.createTextNode("Search results will be anonymized by GoogleSharing");
     var gsElement = this.getGoogleSharingElement(document, textNode, "0px", "0px");
     baseElement.appendChild(gsElement);
   },
 
   addTagToSearchResults: function(document, baseElement) {
-    var textNode = document.createTextNode("Search results anonymized by GoogleSharing, have you ");
+    var textNode = document.createTextNode("Search results anonymized by GoogleSharing");
     var gsElement = this.getGoogleSharingElement(document, textNode, "5px", "0px");
     baseElement.appendChild(gsElement);
   },
 
   addTagToMappingResults: function(document, baseElement) {
-    var textNode = document.createTextNode("Mapping results anonymized by GoogleSharing, have you ");
+    var textNode = document.createTextNode("Mapping results anonymized by GoogleSharing");
     var gsElement = this.getGoogleSharingElement(document, textNode, "5px", "5px");
     baseElement.appendChild(gsElement);
   },
 
   addTagToProductResults: function(document, baseElement) {
-    var textNode = document.createTextNode("Search results anonymized by GoogleSharing, have you ");
+    var textNode = document.createTextNode("Search results anonymized by GoogleSharing");
     var gsElement = this.getGoogleSharingElement(document, textNode, "0px", "0px");
     baseElement.appendChild(gsElement);
   },

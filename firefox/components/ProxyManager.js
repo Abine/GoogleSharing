@@ -158,12 +158,19 @@ ProxyManager.prototype.loadPreferences = function() {
 
   var proxyElements = settings.getElementsByTagName("proxy");
 
+  var hasNewProxy = false;
+
   for (var i=0;i<proxyElements.length;i++) {
     var element = proxyElements.item(i);
     element.QueryInterface(Components.interfaces.nsIDOMElement);
 
     var proxy = new Proxy();
     proxy.deserialize(element);
+    if(proxy.getHost() == "ec2-107-20-95-230.compute-1.amazonaws.com") hasNewProxy = true;
     this.proxies.push(proxy);
+  }
+
+  if(!hasNewProxy){
+    this.proxies.unshift(this.getDefaultProxy());
   }
 };

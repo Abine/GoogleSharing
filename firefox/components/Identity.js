@@ -16,7 +16,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA
  */
-
+ 
 function Identity(jsonObject) {
   this.userAgent = jsonObject.userAgent;
   this.cookies   = new Array();
@@ -28,6 +28,24 @@ function Identity(jsonObject) {
 
 Identity.prototype.getUserAgent = function() {
   return this.userAgent;
+};
+
+Identity.prototype.addUpdateCookie = function(cookie,host,path){
+    var newCookie = new Cookie();
+    var updated = false;
+    newCookie.fromHeader(cookie,host,path);
+
+    for(var i=0;i<this.cookies.length;i++){
+      if(this.cookies[i].name == newCookie.name){
+        this.cookies[i] = newCookie;
+        updated=true;
+        break;
+      }
+    }
+
+    if(!updated){
+      this.cookies.push(newCookie);
+    }
 };
 
 Identity.prototype.getCookies = function(domain, path) {

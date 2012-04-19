@@ -43,57 +43,10 @@ var getRestartCount = function() {
     return preferences.getBranch("googlesharing.").getIntPref("restart-count");    
 };
 
-var loadCertificate = function() {
-  try{
-    var path = __LOCATION__.parent.parent.clone();
-    path.append("certificate.pem");
-    
-    var certDB = Components.classes["@mozilla.org/security/x509certdb;1"]
-    .getService(Components.interfaces.nsIX509CertDB); 
-    
-    certDB.importCertsFromFile(null, path, Components.interfaces.nsIX509Cert.SERVER_CERT);
-    var cert = certDB.findCertByNickname(null, "proxy.googlesharing.net");
-    
-    certDB.setCertTrust(cert, Components.interfaces.nsIX509Cert.SERVER_CERT, Components.interfaces.nsIX509CertDB.TRUSTED_SSL);
-
-    setRestartCount(0);
-  } catch (e) {
-    dump("Failed to load certificate: " + e + "\n");    
-    dump("Restarting...");
-    setRestartCount(getRestartCount()+1);
-    Components.classes["@mozilla.org/toolkit/app-startup;1"].getService(Components.interfaces.nsIAppStartup)
-    .quit(Components.interfaces.nsIAppStartup.eRestart | Components.interfaces.nsIAppStartup.eAttemptQuit);
-
-  }
-};
-
-var initializeCertificate = function() {  
-
-  try {
-    var certDB = Components.classes["@mozilla.org/security/x509certdb;1"]
-    .getService(Components.interfaces.nsIX509CertDB); 
-    
-    var cert = certDB.findCertByNickname(null, "proxy.googlesharing.net");
-    
-  } catch (e ) {
-    dump("Find certificate Exception: " + e + "\nRestart count: " + getRestartCount() + "\n");
-    if (getRestartCount() < 3) {
-      dump("Attempting to load the certificate...\n");
-      loadCertificate();      
-    } else {
-      dump("Looping, not loading certificate...\n");
-    }
-  }
-};
-
-initializeCertificate();
-
 loadScript("Filter.js");
 loadScript("Proxy.js");
 loadScript("ProxyManager.js");
 loadScript("MainThreadDispatcher.js");
-loadScript("LocalProxy.js");
-loadScript("DataShuffler.js");
 loadScript("ConnectionManager.js");
 loadScript("LanguagePreferences.js");
 loadScript("Identity.js");
@@ -111,7 +64,7 @@ function GoogleSharingManager() {
 GoogleSharingManager.prototype = {
   classDescription: "GoogleSharingManager Component",
   classID:          Components.ID("{d29c7ea0-fd61-11de-8a39-0800200c9a66}"),
-  contractID:       "@thoughtcrime.org/googlesharingmanager;1",
+  contractID:       "@getabine.com/googlesharingmanager;1",
   QueryInterface: XPCOMUtils.generateQI(),
   proxyManager: null,
   connectionManager: null,
@@ -119,7 +72,7 @@ GoogleSharingManager.prototype = {
   enabled: false, 
 
   initializeExtensionVersion: function() {
-    var uuid = "googlesharing@extension.thoughtcrime.org";
+    var uuid = "donottrackplus@abine.com";
     if ("@mozilla.org/extensions/manager;1" in Components.classes) {
       var gExtensionManager = Components.classes["@mozilla.org/extensions/manager;1"]
       .getService(Components.interfaces.nsIExtensionManager);
@@ -191,21 +144,14 @@ GoogleSharingManager.prototype = {
     protocolService.registerFilter(this, 10000);
   },
 
-  applyFilter : function(protocolService, uri, proxy) {
-    if (!this.enabled)         return proxy;
-    //    if (!uri.schemeIs("http")) return proxy;
+  applyFilter : function(protocolService, uri, otherProxies) {
+    if (!this.enabled) return proxy;
     
     var requestUri = uri.scheme + "://" + uri.host + uri.path;
-    var localProxy = this.connectionManager.getProxyForURL(requestUri);
-    if (!localProxy) return proxy;
-
-    if (!localProxy.isPrefetchURL(requestUri)) {      
-      localProxy.setProxyTunnel(proxy);
-      return localProxy.getProxyInfo();
-    } else {
-      localProxy.setProxyTunnel(proxy);
-      return localProxy.getEncryptedProxyInfo();
-    }
+    var  proxy = this.connectionManager.getProxyForURL(requestUri);
+    if (!proxy) return otherProxies;
+    proxy.setProxyTunnel(otherProxies);
+    return proxy.getEncryptedProxyInfo();
   },
 
   getAbbreviatedPathForSubject: function(subject) {
@@ -223,19 +169,9 @@ GoogleSharingManager.prototype = {
     observerService.notifyObservers(observerService, "googlesharing-activity", false);
   },
 
-  setHeadersForRequest: function(localProxy, subject) {
-    subject.setRequestHeader("Cookie", "", false);	
-    subject.setRequestHeader("X-GoogleSharing-Version", this.extensionVersion, false);
-    subject.setRequestHeader("X-Interface-Lang", localProxy.getInterfaceLanguage(), false);
-      
-    if (localProxy.getSearchLanguage() != "all") {
-      subject.setRequestHeader("X-Search-Lang", localProxy.getSearchLanguage(), false);
-    }
-  },
-
-  setHeadersForEncryptedRequest: function(localProxy, subject) {
+  setHeadersForEncryptedRequest: function(proxy, subject) {
     var abbreviatedPath = this.getAbbreviatedPathForSubject(subject);
-    var sharedIdentity  = localProxy.fetchSharedIdentity(false);
+    var sharedIdentity  = proxy.fetchSharedIdentity(false);
     var cookies         = null;
     if (sharedIdentity != null)
       cookies           = sharedIdentity.getCookies(subject.originalURI.host, abbreviatedPath);
@@ -251,7 +187,7 @@ GoogleSharingManager.prototype = {
     subject.setRequestHeader("Accept-Language", "en-us,en;q=0.5", false);
   },
 
-  setHeadersForEncryptedResponse: function(localProxy, subject) {
+  setHeadersForEncryptedResponse: function(proxy, subject) {
     var cookie;
 
     try {
@@ -260,28 +196,23 @@ GoogleSharingManager.prototype = {
       return;
     }    
 
-    var abbreviatedPath = this.getAbbreviatedPathForSubject(subject);
-    
-    dump("Updating cookie abbreviated path: " + abbreviatedPath + "\n");
-    
+    var abbreviatedPath = this.getAbbreviatedPathForSubject(subject);  
     subject.setResponseHeader("Set-Cookie", "", false);
-    localProxy.updateSharedIdentity(cookie, subject.originalURI.host, abbreviatedPath);
+
+    cookies = cookie.split("\n");
+
+    for(var i=0;i<cookies.length;i++){
+        proxy.updateSharedIdentity(cookies[i], subject.originalURI.host, abbreviatedPath);
+    }
   },
 
-  handleOutgoingRequest: function(requestUri, localProxy, subject) {    
-    if (!localProxy.isPrefetchURL(requestUri)) {
-      this.setHeadersForRequest(localProxy, subject);
-    } else {
-      this.setHeadersForEncryptedRequest(localProxy, subject);
-    }
-
+  handleOutgoingRequest: function(requestUri, proxy, subject) {
+    this.setHeadersForEncryptedRequest(proxy, subject);
     this.sendActivityNotification();
   },
 
-  handleIncomingResponse: function(requestUri, localProxy, subject) {
-    if (localProxy.isPrefetchURL(requestUri)) {
-      this.setHeadersForEncryptedResponse(localProxy, subject);
-    }
+  handleIncomingResponse: function(requestUri, proxy, subject) {
+      this.setHeadersForEncryptedResponse(proxy, subject);
   },
 
   observe: function(subject, topic, data) {
@@ -289,21 +220,20 @@ GoogleSharingManager.prototype = {
       if (!this.enabled) return;
       subject.QueryInterface(Components.interfaces.nsIHttpChannel);
       var requestUri = subject.originalURI.scheme + "://" + subject.originalURI.host + subject.originalURI.path;
-      var localProxy = this.connectionManager.getProxyForURL(requestUri);    
-      if (!localProxy) return;
+      var proxy = this.connectionManager.getProxyForURL(requestUri);    
+      if (!proxy) return;
 
       if (topic == 'http-on-modify-request') {
-	this.handleOutgoingRequest(requestUri, localProxy, subject);
+	       this.handleOutgoingRequest(requestUri, proxy, subject);
       } else {
-	this.handleIncomingResponse(requestUri, localProxy, subject);
+	       this.handleIncomingResponse(requestUri, proxy, subject);
       }
     } else if (topic == 'network:offline-status-changed') {
       dump("Network offline status changed: " + data + "\n");
       if (data == "online") {
-	this.connectionManager = new ConnectionManager(this.proxyManager);
+	       this.connectionManager = new ConnectionManager(this.proxyManager);
       }
     }
-
   }
 };
 

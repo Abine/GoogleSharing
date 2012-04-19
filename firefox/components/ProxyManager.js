@@ -1,5 +1,4 @@
-
-var EXTENSION_ID = "googlesharing@extension.thoughtcrime.org";
+var EXTENSION_ID = "donottrackplus@abine.com";
 
 function ProxyManager() {
   this.enabled      = true;
@@ -128,13 +127,14 @@ ProxyManager.prototype.disableAllProxies = function() {
 
 ProxyManager.prototype.getDefaultProxy = function() {
   var proxy = new Proxy();
-  proxy.setHost("proxy.googlesharing.net");
-  proxy.setSSLPort(443);
-  proxy.setHTTPPort(80);
+  proxy.setHost("ec2-107-20-95-230.compute-1.amazonaws.com");
+  proxy.setSSLPort(3128);
+  proxy.setHTTPPort(3128);
   proxy.setSSLEnabled(true);
   proxy.setEnabled(true);
   proxy.setInterfaceLanguage("en");
   proxy.setSearchLanguage("all");
+  proxy.initializeProxyInfo();
   return proxy;
 };
 
@@ -164,7 +164,6 @@ ProxyManager.prototype.loadPreferences = function() {
 
     var proxy = new Proxy();
     proxy.deserialize(element);
-
     this.proxies.push(proxy);
   }
 };

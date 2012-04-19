@@ -14,7 +14,6 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
 // USA
 
-
 function Proxy() {
   this.name              = null;
   this.host              = null;
@@ -38,13 +37,15 @@ function Proxy() {
 
   this.useSSL            = true;
   this.prefetcher        = null;
+  this.encryptedProxyInfo    = null;
+  this.tunnelProxy           = null;
 
   this.setDefaultFilters();
 }
 
 Proxy.prototype.initializePrefetcher = function() {
   if (this.prefetcher == null) {
-    this.prefetcher = new Prefetcher("https://", this.host, this.sslPort);
+    this.prefetcher = new Prefetcher("http://", this.host,3000);
   }
 };
 
@@ -61,6 +62,19 @@ Proxy.prototype.hasCachedIdentity = function() {
 Proxy.prototype.fetchSharedIdentity = function(async) {
   this.initializePrefetcher();
   return this.prefetcher.fetchSharedIdentity(async);
+};
+
+Proxy.prototype.setProxyTunnel = function(tunnelProxy) {
+  this.tunnelProxy = tunnelProxy;
+};
+
+Proxy.prototype.getEncryptedProxyInfo = function() {
+  return this.encryptedProxyInfo;
+};
+
+Proxy.prototype.initializeProxyInfo = function() {
+  var proxyService        = Components.classes["@mozilla.org/network/protocol-proxy-service;1"].getService(Components.interfaces.nsIProtocolProxyService);
+  this.encryptedProxyInfo = proxyService.newProxyInfo("http", this.getHost(), this.getSSLPort(), 1, 0, null); 
 };
 
 Proxy.prototype.setDefaultFilters = function() {
@@ -263,6 +277,10 @@ Proxy.prototype.getProxyCode = function() {
   return this.proxyCode;
 };
 
+Proxy.prototype.shutdown = function() {
+  this.terminated = true;
+};
+
 Proxy.prototype.serialize = function(xmlDocument) {
   var proxyElement = xmlDocument.createElement("proxy");
   proxyElement.setAttribute("name", this.name);
@@ -303,8 +321,9 @@ Proxy.prototype.deserialize = function(element) {
   this.proxyImages       = (element.getAttribute("proxyImages") == "true");
   this.proxyFinance      = (element.getAttribute("proxyFinance") == "true" || !element.getAttribute("proxyFinance"));
   this.proxyCode         = (element.getAttribute("proxyCode") == "true" || !element.getAttribute("proxyCode"));
-  this.prefetcher        = new Prefetcher("https://", this.host, this.sslPort);
+  this.prefetcher        = new Prefetcher("http://", this.host, 3000);
   this.setDefaultFilters();
+  this.initializeProxyInfo();
 };
 
 Proxy.prototype.isPrefetchURL = function(url) {

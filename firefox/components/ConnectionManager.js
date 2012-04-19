@@ -17,12 +17,12 @@
 
 function ConnectionManager(proxyManager) {
   this.proxyManager   = proxyManager;
-  this.localProxies   = new Array();
+  this.proxies   = new Array();
   this.lastProxyIndex = 0;
 
   this.registerNotificationListener();
   this.updateLastProxyTime();
-  this.initializeLocalProxies();
+  this.initializeProxies();
 }
 
 ConnectionManager.prototype.isInReuseWindow = function() {
@@ -34,21 +34,21 @@ ConnectionManager.prototype.updateLastProxyTime = function() {
 };
 
 ConnectionManager.prototype.lastProxyMatches = function(url) {
-  if (this.lastProxyIndex < this.localProxies.length) {
-    return this.localProxies[this.lastProxyIndex].matchesURL(url);
+  if (this.lastProxyIndex < this.proxies.length) {
+    return this.proxies[this.lastProxyIndex].matchesURL(url);
   }  
 };
 
 ConnectionManager.prototype.shutdown = function() {
-  for (var i=0;i<this.localProxies.length;i++) {
-    this.localProxies[i].shutdown();
+  for (var i=0;i<this.proxies.length;i++) {
+    this.proxies[i].shutdown();
   }
 };
 
 ConnectionManager.prototype.checkoutProxyAt = function(proxyIndex) {
   this.lastProxyIndex = proxyIndex;
   this.updateLastProxyTime();
-  return this.localProxies[proxyIndex];
+  return this.proxies[proxyIndex];
 }
 
 ConnectionManager.prototype.getProxyForURL = function(url) {
@@ -56,14 +56,14 @@ ConnectionManager.prototype.getProxyForURL = function(url) {
     return this.checkoutProxyAt(this.lastProxyIndex);
   }
 
-  for (var i=this.lastProxyIndex+1;i<this.localProxies.length;i++) {
-    if (this.localProxies[i].matchesURL(url)) {
+  for (var i=this.lastProxyIndex+1;i<this.proxies.length;i++) {
+    if (this.proxies[i].matchesURL(url)) {
       return this.checkoutProxyAt(i);
     }
   }
 
-  for (var i=0;(i<=this.lastProxyIndex) && (i<this.localProxies.length);i++) {
-    if (this.localProxies[i].matchesURL(url)) {
+  for (var i=0;(i<=this.lastProxyIndex) && (i<this.proxies.length);i++) {
+    if (this.proxies[i].matchesURL(url)) {
       return this.checkoutProxyAt(i);
     }
   }
@@ -80,10 +80,10 @@ ConnectionManager.prototype.registerNotificationListener = function() {
 // We would just display the notification here, but nsIAlertService is
 // infuriatingly not supported by all platforms (WHY?), so we need to push
 // this up to the XUL level which can do all the right magic.
-ConnectionManager.prototype.notifyProxyDisabled = function(localProxy) {
+ConnectionManager.prototype.notifyProxyDisabled = function(proxy) {
   var observerService = Components.classes["@mozilla.org/observer-service;1"]
   .getService(Components.interfaces.nsIObserverService);  
-  observerService.notifyObservers(localProxy, "googlesharing-proxyfailed-status", null);
+  observerService.notifyObservers(proxy, "googlesharing-proxyfailed-status", null);
 };
 
 ConnectionManager.prototype.notifyAllProxiesDisabled = function() {
@@ -106,34 +106,31 @@ ConnectionManager.prototype.observe = function(subject, topic, data) {
 };
 
 ConnectionManager.prototype.removeProxy = function(proxy) {
-  for (var i=0;i<this.localProxies.length;i++) {
-    if (this.localProxies[i] == proxy) {
-      this.localProxies.splice(i,1);
+  for (var i=0;i<this.proxies.length;i++) {
+    if (this.proxies[i] == proxy) {
+      this.proxies.splice(i,1);
       break;
     }
   }
 
-  if (this.localProxies.length == 0) 
+  if (this.proxies.length == 0) 
     this.notifyAllProxiesDisabled();
-
 };
 
 ConnectionManager.prototype.hasProxy = function(proxy) {
-  for (var i=0;i<this.localProxies.length;i++) {
-    if (this.localProxies[i] == proxy) {
+  for (var i=0;i<this.proxies.length;i++) {
+    if (this.proxies[i] == proxy) {
       return true;
     }
   }
-
   return false;
 };
 
-ConnectionManager.prototype.initializeLocalProxies = function() {
+ConnectionManager.prototype.initializeProxies = function() {
   for (var i=0;i<this.proxyManager.getProxyCount();i++) {
     var proxy = this.proxyManager.getProxyAtIndex(i);
     if (proxy.getEnabled()) {
-      var localProxy = new LocalProxy(proxy);
-      this.localProxies.push(localProxy);      
+      this.proxies.push(proxy);      
     }
   }
 };

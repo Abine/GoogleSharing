@@ -50,7 +50,7 @@ ContentPolicy.prototype = {
 
   shouldLoad: function(aContentType, aContentLocation, aRequestOrigin, aContext, aMimeTypeGuess, aExtra) {
     if ((aContentLocation.scheme == "http" || aContentLocation.scheme == "http") && 
-	this.blockExpression.test(aContentLocation.host + aContentLocation.path)) 
+	     this.blockExpression.test(aContentLocation.host + aContentLocation.path)) 
     {
       return false;
     }

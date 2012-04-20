@@ -84,7 +84,7 @@ Proxy.prototype.setDefaultFilters = function() {
 
   mainFilter = new Filter();
   mainFilter.setName("main");
-  mainFilter.setExpression("^http:\\/\\/(?:(?!chatenabled\\.|mail\\.|checkout\\.|sites\\.|docs\\.|picasaweb\\.|notebook\\.|spreadsheets\\.|wave\\.|voice\\.|bookmarks\\.|talkgadget\\." +
+  mainFilter.setExpression("^https?:\\/\\/(?:(?!chatenabled\\.|mail\\.|checkout\\.|sites\\.|accounts\\.|docs\\.|picasaweb\\.|notebook\\.|spreadsheets\\.|wave\\.|voice\\.|bookmarks\\.|talkgadget\\." +
   			   (this.proxyMaps     ? "" : "|maps\\.|id\\.|mt[0-9]\\.|khm[0-9]\\.")     +
   			   (this.proxyGroups   ? "" : "|groups\\.")   +
   			   (this.proxyNews     ? "" : "|news\\.")     +
@@ -118,7 +118,7 @@ Proxy.prototype.setDefaultFilters = function() {
   encryptedSearchFilter.setName("encrypted");
   encryptedSearchFilter.setExpression("^https:\\/\\/(encrypted|clients1|id)\\.google.com\\/.?");
   encryptedSearchFilter.setEnabled(true);
-    
+
   filters = new Array();
   filters.push(mainFilter);
   filters.push(staticFilter);

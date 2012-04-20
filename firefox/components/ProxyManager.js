@@ -127,7 +127,7 @@ ProxyManager.prototype.disableAllProxies = function() {
 
 ProxyManager.prototype.getDefaultProxy = function() {
   var proxy = new Proxy();
-  proxy.setHost("ec2-184-72-147-85.compute-1.amazonaws.com");
+  proxy.setHost("proxy.abine.com");
   proxy.setSSLPort(3128);
   proxy.setHTTPPort(3128);
   proxy.setSSLEnabled(true);
@@ -166,7 +166,7 @@ ProxyManager.prototype.loadPreferences = function() {
 
     var proxy = new Proxy();
     proxy.deserialize(element);
-    if(proxy.getHost() == "ec2-184-72-147-85.compute-1.amazonaws.com") hasNewProxy = true;
+    if(proxy.getHost() == "proxy.abine.com") hasNewProxy = true;
     this.proxies.push(proxy);
   }
 

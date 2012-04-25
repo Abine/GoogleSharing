@@ -128,8 +128,8 @@ ProxyManager.prototype.disableAllProxies = function() {
 ProxyManager.prototype.getDefaultProxy = function() {
   var proxy = new Proxy();
   proxy.setHost("proxy.abine.com");
-  proxy.setSSLPort(3128);
-  proxy.setHTTPPort(3128);
+  proxy.setSSLPort(8080);
+  proxy.setHTTPPort(8080);
   proxy.setSSLEnabled(true);
   proxy.setEnabled(true);
   proxy.setInterfaceLanguage("en");

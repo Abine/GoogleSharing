@@ -168,6 +168,10 @@ GoogleSharingManager.prototype = {
     .getService(Components.interfaces.nsIObserverService);  
     observerService.notifyObservers(observerService, "googlesharing-activity", false);
   },
+  dump: function(aMessage) {
+    var consoleService = Components.classes["@mozilla.org/consoleservice;1"].getService(Components.interfaces.nsIConsoleService);
+    consoleService.logStringMessage("GS2: "+(new Date())+"\n" + aMessage);
+  },
 
   setHeadersForEncryptedRequest: function(proxy, subject) {
     var abbreviatedPath = this.getAbbreviatedPathForSubject(subject);
@@ -176,7 +180,7 @@ GoogleSharingManager.prototype = {
     if (sharedIdentity != null)
       cookies           = sharedIdentity.getCookies(subject.originalURI.host, abbreviatedPath);
     
-    if (cookies != null) {
+    if (cookies) {
       subject.setRequestHeader("Cookie", cookies, false);
     } else {
       subject.setRequestHeader("Cookie", "", false);

@@ -31,12 +31,18 @@ function Cookie(jsonObject) {
   }
 }
 
+
+Cookie.prototype.splitOnce = function(str,delim){
+  var arr = str.split(delim);
+  var first = arr[0];
+  arr.shift();
+  return [first,arr.join("delim")];
+}
+
 Cookie.prototype.fromHeader = function(cookieString,domain,path){
   if(cookieString && domain && path){
-   
     var tokens = cookieString.split(";");
-    var firstEqualSign = tokens[0].indexOf("=");
-    var nameValue = [tokens[0].substring(0,firstEqualSign),tokens[0].substring(firstEqualSign+1)];
+    var nameValue = this.splitOnce(tokens[0],"=");
     var parameters = this.parseCookieParameters(tokens);
 
     if(nameValue.length > 1){
@@ -68,8 +74,7 @@ Cookie.prototype.stripDownPath = function(path){
 Cookie.prototype.parseCookieParameters = function(tokens){
   var params = {};
   for(var i=0;i<tokens.length;i++){
-    var nameValue = tokens[i].split("=",1);
-
+    var nameValue = this.splitOnce(tokens[i],"=");
     if(nameValue.length > 1){
       params[nameValue[0].trim().toLowerCase()] = nameValue[1].trim();
     }
@@ -99,9 +104,9 @@ Cookie.prototype.stripDownPath = function(path){
 
 Cookie.prototype.isValidFor = function(domain,path){
   if(this.domain[0] == '.')
-    return (this.domain.substring(1) == domain && path.indexOf(this.path) == 0);
+    return (this.endsWith(domain,this.domain) && path.indexOf(this.path) == 0);
   else
-    return ((this.domain == domain || domain == '.'+this.domain) && path.indexOf(this.path)==0);
+    return ( (this.domain == domain || this.endsWith(domain,'.'+this.domain)) && path.indexOf(this.path)==0);
 };
 
 Cookie.prototype.parseCookieParameters = function(tokens){

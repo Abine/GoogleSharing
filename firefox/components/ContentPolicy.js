@@ -112,10 +112,10 @@ ContentPolicy.prototype = {
     dump("Modified URI from: " + aContentLocation.spec + " to: " + spec + "\n");
 
     var secureUri           = this.getUriForSpec(spec);
-    aContentLocation.scheme = secureUri.scheme;
-    aContentLocation.host   = secureUri.host;
-    aContentLocation.port   = secureUri.port;
-    aContentLocation.path   = secureUri.path;
+    try{ aContentLocation.scheme = secureUri.scheme;} catch (e){}
+    try{ aContentLocation.host   = secureUri.host; } catch (e){}
+    try{ aContentLocation.port   = secureUri.port; } catch (e){}
+    try{ aContentLocation.path   = secureUri.path; } catch (e){}
   },
 
   getLanguifiedSpec: function(spec, proxy) {

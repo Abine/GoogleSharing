@@ -20,7 +20,7 @@
 function Prefetcher(urlScheme, host, port) {
   this.urlScheme               = urlScheme;
   this.host                    = host;
-  this.port                    = 3000;
+  this.port                    = 80;
 
   this.cachedIdentity          = null;
   this.backupIdentity          = null;

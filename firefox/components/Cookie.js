@@ -36,7 +36,7 @@ Cookie.prototype.splitOnce = function(str,delim){
   var arr = str.split(delim);
   var first = arr[0];
   arr.shift();
-  return [first,arr.join("delim")];
+  return [first,arr.join(delim)];
 }
 
 Cookie.prototype.fromHeader = function(cookieString,domain,path){

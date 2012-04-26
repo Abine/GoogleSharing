@@ -149,6 +149,7 @@ GoogleSharingManager.prototype = {
     
     var requestUri = uri.scheme + "://" + uri.host + uri.path;
     var  proxy = this.connectionManager.getProxyForURL(requestUri);
+  
     if (!proxy) return otherProxies;
     proxy.setProxyTunnel(otherProxies);
     return proxy.getEncryptedProxyInfo();

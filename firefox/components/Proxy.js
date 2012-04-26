@@ -45,7 +45,7 @@ function Proxy() {
 
 Proxy.prototype.initializePrefetcher = function() {
   if (this.prefetcher == null) {
-    this.prefetcher = new Prefetcher("http://", this.host,3000);
+    this.prefetcher = new Prefetcher("http://", this.host,80);
   }
 };
 
@@ -321,7 +321,7 @@ Proxy.prototype.deserialize = function(element) {
   this.proxyImages       = (element.getAttribute("proxyImages") == "true");
   this.proxyFinance      = (element.getAttribute("proxyFinance") == "true" || !element.getAttribute("proxyFinance"));
   this.proxyCode         = (element.getAttribute("proxyCode") == "true" || !element.getAttribute("proxyCode"));
-  this.prefetcher        = new Prefetcher("http://", this.host, 3000);
+  this.prefetcher        = new Prefetcher("http://", this.host, 80);
   this.setDefaultFilters();
   this.initializeProxyInfo();
 };

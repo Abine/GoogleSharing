@@ -147,6 +147,10 @@ GoogleSharingManager.prototype = {
   applyFilter : function(protocolService, uri, otherProxies) {
     if (!this.enabled) return proxy;
     
+    // REVIEW 2012-04-27 <moxie> -- We should make sure that we're not
+    // proxying SSL traffic [if uri.scheme.tolower() != "https" {return}],
+    // not include teh scheme in the request uri and have all the filters
+    // be scheme-agnostic.
     var requestUri = uri.scheme + "://" + uri.host + uri.path;
     var  proxy = this.connectionManager.getProxyForURL(requestUri);
   

@@ -45,6 +45,8 @@ function Proxy() {
 
 Proxy.prototype.initializePrefetcher = function() {
   if (this.prefetcher == null) {
+    // REVIEW 2012-04-26 <moxie> -- Whis is this port hardcoded
+    // as 80?  The default HTTP port is even 8080 for proxy.abine.com?
     this.prefetcher = new Prefetcher("http://", this.host,80);
   }
 };
@@ -77,6 +79,10 @@ Proxy.prototype.initializeProxyInfo = function() {
   this.encryptedProxyInfo = proxyService.newProxyInfo("http", this.getHost(), this.getSSLPort(), 1, 0, null); 
 };
 
+
+// REVIEW 2012-04-26 <moxie> -- These filters should all probably be made to be
+// protocol agnostic, and the code calling in for a filter match should handle forcing
+// the upgrade to https and passing everything post-protocol specifier.
 Proxy.prototype.setDefaultFilters = function() {
   var javascriptApiPaths = 
   "|\\/jsapi|\\/uds\\/|\\/books\\/api\\.js|\\/friendconnect\\/script\\/friendconnect\\.js|\\/s2\\/sharing\\/js|\\/maps\\?.*file=(googleapi|api).*" + 
@@ -141,6 +147,7 @@ Proxy.prototype.setHost = function(host) {
   this.host = host;
 };
 
+// REVIEW 2012-04-26 <moxie> -- No such thing as SSL port.
 Proxy.prototype.getSSLPort = function() {
   return this.sslPort;
 };
@@ -173,6 +180,8 @@ Proxy.prototype.setFilters = function(filters) {
   this.filters = filters;
 };
 
+// REVIEW 2012-04-26 <moxie> -- There should be no more distinction
+// between encrypted and normal filters.
 Proxy.prototype.setEncryptedFilters = function(filters) {
   this.encryptedFilters = filters;
 };

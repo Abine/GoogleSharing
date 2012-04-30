@@ -55,6 +55,7 @@ ContentPolicy.prototype = {
       return false;
     }
 
+    // REVIEW 2012-04-27 <moxie> -- Strip the scheme off this check.
     var proxy = this.getProxyForURL(aContentLocation.spec);
 
     if (aContentLocation.scheme == "http" && proxy != null) 
@@ -62,6 +63,7 @@ ContentPolicy.prototype = {
 
     if (this.autoCompleteExpression.test(aContentLocation.spec) && !proxy.hasCachedIdentity()) {
       try {
+	// REVIEW 2012-04-27 <moxie> -- This doesn't seem necessary any longer?
 	proxy.fetchSharedIdentity(true);
       } catch (e) {
 	dump("Got exception on prefetch: " + e + "\n");
@@ -95,6 +97,8 @@ ContentPolicy.prototype = {
   },
 
   upgradeSpecToHttpsIfPossible: function(spec) {
+    // REVIEW 2012-04-27 <moxie> -- These should be consolidated into and match the regexps
+    // in Proxy.js
     spec = spec.replace(/^http:\/\/(www\.)?google\.com\/$/ig, "https://encrypted.google.com/");
     spec = spec.replace(/^http:\/\/(www\.)?google\.com\/(search||webhp||#)?/ig, 
 		      "https://encrypted.google.com/$2");

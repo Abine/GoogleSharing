@@ -128,6 +128,9 @@ ProxyManager.prototype.disableAllProxies = function() {
 ProxyManager.prototype.getDefaultProxy = function() {
   var proxy = new Proxy();
   proxy.setHost("proxy.abine.com");
+  // REVIEW 2012-04-26 <moxie> -- No such thing as an SSL
+  // port any longer.  There should now be a single property
+  // called 'port'.
   proxy.setSSLPort(8080);
   proxy.setHTTPPort(8080);
   proxy.setSSLEnabled(true);
@@ -150,6 +153,10 @@ ProxyManager.prototype.loadPreferences = function() {
   var rootElement   = settings.getElementsByTagName("googlesharing");
   this.enabled      = (rootElement.item(0).getAttribute("enabled") == "true");
   this.shortStatus  = (rootElement.item(0).getAttribute("shortStatus") == "true");
+
+  // REVIEW 2012-04-26 <moxie> -- We need to remove this option and everything
+  // that connects to it, we'll be tunneling everything via SSL now and not doing
+  // upgrades to the proxy.
   this.upgradeToSsl = (rootElement.item(0).getAttribute("upgrade-ssl") == "true");
 
   if (!rootElement.item(0).hasAttribute("upgrade-ssl")) {
@@ -166,10 +173,14 @@ ProxyManager.prototype.loadPreferences = function() {
 
     var proxy = new Proxy();
     proxy.deserialize(element);
+    // REVIEW 2012-04-26 <moxie> -- This hostname should be
+    // a constant defined in a single place.
     if(proxy.getHost() == "proxy.abine.com") hasNewProxy = true;
     this.proxies.push(proxy);
   }
 
+  // REVIEW 2012-04-26 <moxie> -- What if someone intentionally
+  // remove this?
   if(!hasNewProxy){
     this.proxies.unshift(this.getDefaultProxy());
   }

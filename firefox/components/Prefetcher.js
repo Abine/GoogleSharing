@@ -30,6 +30,8 @@ function Prefetcher(urlScheme, host, port) {
 }
 
 Prefetcher.prototype.parseIdentity = function(response) {
+  // REVIEW 2012-04-27 <moxie> -- Why does the respose have escaped quotes in it?  We should
+  // just fix that, no?
 
   // kind of hacky, response comes back wrapped in quotes, and internal quotes are escaped.
   response = response.substring(1,response.length-1);
@@ -49,12 +51,16 @@ Prefetcher.prototype.sendRequest = function(request, async,method,data) {
   var thisInstance  = this;
   if (async) {
     if(method == "PUT"){
+      // REVIEW 2012-04-27 <moxie> -- Remove comments, if the code isn't clear it should
+      // be refactored.
+
       // we don't care about the response for checking in identity
       cookieRequest.onreadystatechange = function(){};
     } else {
       cookieRequest.onreadystatechange = function() {
         if (cookieRequest.readyState == 4) {  
       	 if(cookieRequest.status == 200) {
+	   // REVIEW 2012-04-27 <moxie> -- Fix tabs.
       	   thisInstance.parseIdentity(cookieRequest.responseText);
   	       thisInstance.outstandingAsyncRequest = false;
       	 } else {
@@ -92,7 +98,13 @@ Prefetcher.prototype.fetchCachedSharedIdentity = function() {
 
     return this.cachedIdentity;
 
+    // REVIEW 2012-04-27 <moxie> -- This feels like overloading of this function to me,
+    // and it should be recomposed up into fetchIdentity, or both methods should be recomposed
+    // into a separate collection of functions.
   } else if(this.hasBackupIdentity()){
+    // REVIEW 2012-04-27 <moxie> -- Remove comments, replace with identically-named functions
+    // if necessary.
+
     // check in old identity
     this.sendRequest(this.urlScheme + this.host + ":" + this.port + "/identity",true,"PUT",JSON.stringify(this.cachedIdentity));
     // swap with backup identity
@@ -112,6 +124,8 @@ Prefetcher.prototype.updateSharedIdentity = function(cookie, domain, path) {
   }
 };
 
+// REVIEW 2012-04-27 <moxie> -- This class should kick off an async identity
+// request on startup so that there's never a blocking action from the chrome.
 Prefetcher.prototype.fetchSharedIdentity = function(async) {
   var identity = this.fetchCachedSharedIdentity();
   if (identity == null && !(async && this.outstandingAsyncRequest)){

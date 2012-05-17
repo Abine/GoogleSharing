@@ -5,16 +5,10 @@ function ProxyManager() {
   this.shortStatus  = false;
   this.upgradeToSsl = true;
   this.proxies      = new Array();
+  this.defaultHost = "proxy.abine.com";
   this.loadPreferences();
+  
 }
-
-ProxyManager.prototype.isUpgradeSsl = function() {
-  return this.upgradeToSsl;
-};
-
-ProxyManager.prototype.setUpgradeSsl = function(value) {
-  this.upgradeToSsl = value;
-};
 
 ProxyManager.prototype.isShortStatus = function() {
   return this.shortStatus;
@@ -127,13 +121,12 @@ ProxyManager.prototype.disableAllProxies = function() {
 
 ProxyManager.prototype.getDefaultProxy = function() {
   var proxy = new Proxy();
-  proxy.setHost("proxy.abine.com");
+  proxy.setHost(this.defaultHost);
   // REVIEW 2012-04-26 <moxie> -- No such thing as an SSL
   // port any longer.  There should now be a single property
   // called 'port'.
-  proxy.setSSLPort(8080);
+  proxy.setPrefetchPort(80);
   proxy.setHTTPPort(8080);
-  proxy.setSSLEnabled(true);
   proxy.setEnabled(true);
   proxy.setInterfaceLanguage("en");
   proxy.setSearchLanguage("all");
@@ -154,15 +147,6 @@ ProxyManager.prototype.loadPreferences = function() {
   this.enabled      = (rootElement.item(0).getAttribute("enabled") == "true");
   this.shortStatus  = (rootElement.item(0).getAttribute("shortStatus") == "true");
 
-  // REVIEW 2012-04-26 <moxie> -- We need to remove this option and everything
-  // that connects to it, we'll be tunneling everything via SSL now and not doing
-  // upgrades to the proxy.
-  this.upgradeToSsl = (rootElement.item(0).getAttribute("upgrade-ssl") == "true");
-
-  if (!rootElement.item(0).hasAttribute("upgrade-ssl")) {
-    this.upgradeToSsl = true;
-  }
-
   var proxyElements = settings.getElementsByTagName("proxy");
 
   var hasNewProxy = false;
@@ -173,14 +157,14 @@ ProxyManager.prototype.loadPreferences = function() {
 
     var proxy = new Proxy();
     proxy.deserialize(element);
-    // REVIEW 2012-04-26 <moxie> -- This hostname should be
-    // a constant defined in a single place.
-    if(proxy.getHost() == "proxy.abine.com") hasNewProxy = true;
+    if(proxy.getHost() == this.defaultHost) hasNewProxy = true;
     this.proxies.push(proxy);
   }
 
   // REVIEW 2012-04-26 <moxie> -- What if someone intentionally
   // remove this?
+  // JAMES: agreed, this was to handle peope upgrading from old googlesharing
+  // plugin.  Would need to add some kind of flag so we only do this once.
   if(!hasNewProxy){
     this.proxies.unshift(this.getDefaultProxy());
   }

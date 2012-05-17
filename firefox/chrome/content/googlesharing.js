@@ -249,28 +249,6 @@ var GoogleShare = {
       return;
   },
 
-  handleClassicRequest: function() {
-    if (confirm("Disable GoogleSharing SSL upgrade?")) {
-      this.googleSharingManager.getProxyManager().setUpgradeSsl(false);
-      this.googleSharingManager.getProxyManager().savePreferences();      
-      window.document.location="http://www.google.com/";
-    }
-  },
-
-  addDowngradeLink: function(document) {
-    if (this.googleSharingManager.getProxyManager().isUpgradeSsl()) {
-      var linkElements = document.getElementsByTagName("a");
-
-      for (var i=0;i<linkElements.length;i++) {
-	var link = linkElements[i];
-
-	if (link.getAttribute("href") == "http://www.google.com/") {
-	  link.addEventListener("click", function() { GoogleShare.handleClassicRequest(); }, true);
-	}
-      }
-    }
-  },
-
   onContentLoad: function(event) {
     if (!(event.originalTarget instanceof HTMLDocument) ||
 	(this.googleSharingManager == null)             ||
@@ -284,7 +262,6 @@ var GoogleShare = {
 
     if (this.isTaggable(document)) {
       this.addTagToDocument(document);
-      this.addDowngradeLink(document);
     }
 
     var ignore   = false;

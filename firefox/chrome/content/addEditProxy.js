@@ -110,9 +110,8 @@ function onDialogLoad() {
   if (retVal.proxy) {
     var proxy = retVal.proxy;
     document.getElementById("proxy-host").value = proxy.getHost();
-    document.getElementById("ssl-port").value   = proxy.getSSLPort();
+    document.getElementById("prefetch-port").value   = proxy.getPrefetchPort();
     document.getElementById("http-port").value  = proxy.getHTTPPort();
-    document.getElementById("use-ssl").checked  = proxy.isSSLEnabled();
 
     setInterfaceLanguage(proxy.getInterfaceLanguage());
     setSearchLanguage(proxy.getSearchLanguage());
@@ -135,12 +134,12 @@ function onDialogLoad() {
 
 function onDialogOK() {  
   var host              = document.getElementById("proxy-host").value;
-  var sslPort           = document.getElementById("ssl-port").value;
+  var prefetchPort           = document.getElementById("prefetch-port").value;
   var httpPort          = document.getElementById("http-port").value;
   var interfaceLanguage = document.getElementById("interface-language").selectedItem.value;
   var searchLanguage    = getSearchLanguage();
 
-  if (!host || !sslPort || !httpPort ) {
+  if (!host || !prefetchPort || !httpPort ) {
     alert("Sorry, you  must specify a host and ports.");
     return false;
   }
@@ -157,9 +156,8 @@ function onDialogOK() {
   }
 
   proxy.setHost(host);
-  proxy.setSSLPort(sslPort);
+  proxy.setPrefetchPort(prefetchPort);
   proxy.setHTTPPort(httpPort);
-  proxy.setSSLEnabled(document.getElementById("use-ssl").checked);
   proxy.setInterfaceLanguage(interfaceLanguage);
   proxy.setSearchLanguage(searchLanguage);
 

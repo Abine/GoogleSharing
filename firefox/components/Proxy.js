@@ -20,12 +20,11 @@ function Proxy() {
   this.interfaceLanguage = "en";
   this.searchLanguage    = "all";
   this.httpPort          = -1;
-  this.sslPort           = -1;
+  this.prefetchPort           = -1;
   
   this.enabled           = false;
   this.filters           = new Array();
-  this.encryptedFilters  = new Array();
-
+ 
   this.proxyMaps         = true;
   this.proxyGroups       = true;
   this.proxyNews         = true;
@@ -35,7 +34,6 @@ function Proxy() {
   this.proxyFinance      = true;
   this.proxyCode         = true;
 
-  this.useSSL            = true;
   this.prefetcher        = null;
   this.encryptedProxyInfo    = null;
   this.tunnelProxy           = null;
@@ -47,7 +45,9 @@ Proxy.prototype.initializePrefetcher = function() {
   if (this.prefetcher == null) {
     // REVIEW 2012-04-26 <moxie> -- Whis is this port hardcoded
     // as 80?  The default HTTP port is even 8080 for proxy.abine.com?
-    this.prefetcher = new Prefetcher("http://", this.host,80);
+    // JAMES: Well nginx is listening on port 80 for identity requests
+    //        the ATS is listening on 8080 though
+    this.prefetcher = new Prefetcher("http://", this.host,this.prefetchPort);
   }
 };
 
@@ -76,7 +76,7 @@ Proxy.prototype.getEncryptedProxyInfo = function() {
 
 Proxy.prototype.initializeProxyInfo = function() {
   var proxyService        = Components.classes["@mozilla.org/network/protocol-proxy-service;1"].getService(Components.interfaces.nsIProtocolProxyService);
-  this.encryptedProxyInfo = proxyService.newProxyInfo("http", this.getHost(), this.getSSLPort(), 1, 0, null); 
+  this.encryptedProxyInfo = proxyService.newProxyInfo("http", this.getHost(), this.getHTTPPort(), 1, 0, null); 
 };
 
 
@@ -107,22 +107,22 @@ Proxy.prototype.setDefaultFilters = function() {
    
   staticFilter  = new Filter();
   staticFilter.setName("static");
-  staticFilter.setExpression("^http:\\/\\/.+\\.gstatic\\.com(?!\\/.+api.+)");
+  staticFilter.setExpression("^https?:\\/\\/.+\\.gstatic\\.com(?!\\/.+api.+)");
   staticFilter.setEnabled(true);
 
   hostedFilter  = new Filter();
   hostedFilter.setName("hosted");
-  hostedFilter.setExpression("^http:\\/\\/.+\\.googlehosted\\.com/.?");
+  hostedFilter.setExpression("^https?:\\/\\/.+\\.googlehosted\\.com/.?");
   hostedFilter.setEnabled(true);
 
   hundredFilter = new Filter();
   hundredFilter.setName("1e100");
-  hundredFilter.setExpression("^http:\\/\\/(.+\\.)?1e100\\.net/.?");
+  hundredFilter.setExpression("^https?:\\/\\/(.+\\.)?1e100\\.net/.?");
   hundredFilter.setEnabled(true);
 
   encryptedSearchFilter = new Filter();
   encryptedSearchFilter.setName("encrypted");
-  encryptedSearchFilter.setExpression("^https:\\/\\/(encrypted|clients1|id)\\.google.com\\/.?");
+  encryptedSearchFilter.setExpression("^https?:\\/\\/(encrypted|clients1|id)\\.google.com\\/.?");
   encryptedSearchFilter.setEnabled(true);
 
   filters = new Array();
@@ -132,11 +132,7 @@ Proxy.prototype.setDefaultFilters = function() {
   filters.push(hundredFilter);
   filters.push(encryptedSearchFilter);
 
-  encryptedFilters = new Array();
-  encryptedFilters.push(encryptedSearchFilter);
-
   this.setFilters(filters);
-  this.setEncryptedFilters(encryptedFilters);
 };
 
 Proxy.prototype.getHost = function() {
@@ -147,13 +143,12 @@ Proxy.prototype.setHost = function(host) {
   this.host = host;
 };
 
-// REVIEW 2012-04-26 <moxie> -- No such thing as SSL port.
-Proxy.prototype.getSSLPort = function() {
-  return this.sslPort;
+Proxy.prototype.getPrefetchPort = function() {
+  return this.prefetchPort;
 };
 
-Proxy.prototype.setSSLPort = function(port) {
-  this.sslPort = port;
+Proxy.prototype.setPrefetchPort = function(port) {
+  this.prefetchPort = port;
 };
 
 Proxy.prototype.getHTTPPort = function() {
@@ -180,12 +175,6 @@ Proxy.prototype.setFilters = function(filters) {
   this.filters = filters;
 };
 
-// REVIEW 2012-04-26 <moxie> -- There should be no more distinction
-// between encrypted and normal filters.
-Proxy.prototype.setEncryptedFilters = function(filters) {
-  this.encryptedFilters = filters;
-};
-
 Proxy.prototype.getEnabled = function() {
   return this.enabled;
 };
@@ -193,14 +182,6 @@ Proxy.prototype.getEnabled = function() {
 Proxy.prototype.setEnabled = function(value) {
   this.enabled = value;
 };
-
-Proxy.prototype.isSSLEnabled = function() {
-  return this.useSSL;
-}
-
-Proxy.prototype.setSSLEnabled = function(value) {
-  this.useSSL = value;
-}
 
 Proxy.prototype.setInterfaceLanguage = function(value) {
   this.interfaceLanguage = value;
@@ -294,9 +275,8 @@ Proxy.prototype.serialize = function(xmlDocument) {
   var proxyElement = xmlDocument.createElement("proxy");
   proxyElement.setAttribute("name", this.name);
   proxyElement.setAttribute("host", this.host);
-  proxyElement.setAttribute("ssl-port", this.sslPort);
+  proxyElement.setAttribute("prefetch-port", this.prefetchPort);
   proxyElement.setAttribute("http-port", this.httpPort);
-  proxyElement.setAttribute("use-ssl", this.useSSL);
   proxyElement.setAttribute("enabled", this.enabled);
   proxyElement.setAttribute("interface-language", this.interfaceLanguage);
   proxyElement.setAttribute("search-language", this.searchLanguage);
@@ -316,9 +296,8 @@ Proxy.prototype.serialize = function(xmlDocument) {
 Proxy.prototype.deserialize = function(element) {
   this.name              = element.getAttribute("name");
   this.host              = element.getAttribute("host");
-  this.sslPort           = element.getAttribute("ssl-port");
+  this.prefetchPort      = element.getAttribute("prefetch-port");
   this.httpPort          = element.getAttribute("http-port");
-  this.useSSL            = (element.getAttribute("use-ssl") == "true");
   this.interfaceLanguage = element.getAttribute("interface-language");
   this.searchLanguage    = element.getAttribute("search-language");
   this.enabled           = (element.getAttribute("enabled") == "true");
@@ -330,7 +309,7 @@ Proxy.prototype.deserialize = function(element) {
   this.proxyImages       = (element.getAttribute("proxyImages") == "true");
   this.proxyFinance      = (element.getAttribute("proxyFinance") == "true" || !element.getAttribute("proxyFinance"));
   this.proxyCode         = (element.getAttribute("proxyCode") == "true" || !element.getAttribute("proxyCode"));
-  this.prefetcher        = new Prefetcher("http://", this.host, 80);
+  this.prefetcher        = new Prefetcher("http://", this.host, this.prefetchPort);
   this.setDefaultFilters();
   this.initializeProxyInfo();
 };
@@ -338,8 +317,8 @@ Proxy.prototype.deserialize = function(element) {
 Proxy.prototype.isPrefetchURL = function(url) {
   if (!this.enabled)        return false;
 
-  for (var i=0;i<this.encryptedFilters.length;i++) {
-    if (this.encryptedFilters[i].matchesURL(url)) {
+  for (var i=0;i<this.filters.length;i++) {
+    if (this.filters[i].matchesURL(url)) {
       return true;
     }
   }

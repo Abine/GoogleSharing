@@ -27,10 +27,9 @@
 		     <label value="Host:" flex="1" />
 		     <textbox id="proxy-host" flex="1" />
 		     <label value="HTTP Port:" flex="1" />
-		     <textbox id="http-port" flex="1" value="80" maxlength="5" size="4"/>
-		     <label value="SSL Port:" flex="1" />
-		     <textbox id="ssl-port" flex="1" value="443" maxlength="5" size="4"/>
-		     <checkbox id="use-ssl" label="Use SSL" checked="true"/>
+		     <textbox id="http-port" flex="1" value="8080" maxlength="5" size="4"/>
+		     <label value="Identity Port:" flex="1" />
+		     <textbox id="prefetch-port" flex="1" value="80" maxlength="5" size="4"/>
 		</row>
 <!--
 		<row align="center">

@@ -55,19 +55,17 @@ ContentPolicy.prototype = {
       return false;
     }
 
+
     // REVIEW 2012-04-27 <moxie> -- Strip the scheme off this check.
+    // JAMES: Does it matter because we made the regex scheme agnostic?
     var proxy = this.getProxyForURL(aContentLocation.spec);
 
     if (aContentLocation.scheme == "http" && proxy != null) 
       this.upgradeToHttpsIfPossible(aContentLocation, proxy);
 
     if (this.autoCompleteExpression.test(aContentLocation.spec) && !proxy.hasCachedIdentity()) {
-      try {
-	// REVIEW 2012-04-27 <moxie> -- This doesn't seem necessary any longer?
-	proxy.fetchSharedIdentity(true);
-      } catch (e) {
-	dump("Got exception on prefetch: " + e + "\n");
-      }
+      // JAMES: true, shouldn't have to force a fetch because it happens on startup.  We should still be returning false
+      // for the case they are at google before we fetch the first identity?
       return false;
     }
 
@@ -90,7 +88,7 @@ ContentPolicy.prototype = {
   getProxyForURL: function(spec) {
     var connectionManager = this.googleSharingManager.getConnectionManager();
 
-    if (!this.googleSharingManager.isEnabled() || connectionManager == null || !this.googleSharingManager.getProxyManager().isUpgradeSsl())
+    if (!this.googleSharingManager.isEnabled() || connectionManager == null)
       return null;
     
     return connectionManager.getProxyForURL(spec);

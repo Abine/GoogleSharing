@@ -30,7 +30,7 @@
      <splitter class="tree-splitter" />
      <treecol id="proxyHTTPPort" label="HTTP" flex="1" editable="false"/>
      <splitter class="tree-splitter" />
-     <treecol id="proxySSLPort" label="SSL" flex="1" editable="false"/>
+     <treecol id="proxyPrefetchPort" label="Identity" flex="1" editable="false"/>
 
   </treecols>
   <treechildren />  
@@ -49,7 +49,6 @@
 -->
   </vbox>
 </hbox>
-<checkbox id="upgrade-ssl" label="Upgrade to SSL when possible." />
 </vbox>
 <!--
 </prefpane>

@@ -31,10 +31,8 @@ function onOptionsLoad() {
 }
 
 function onOptionsSave() {
-  proxyManager.setUpgradeSsl(document.getElementById("upgrade-ssl").checked);
   proxyManager.savePreferences();
   issuePreferencesChangedNotification();
-
   return true;
 }
 
@@ -64,7 +62,6 @@ function onAddProxy() {
 }
 
 function update() {
-  document.getElementById("upgrade-ssl").checked = proxyManager.isUpgradeSsl();
   var proxyTree                                  = getProxyTree();
 
   proxyTree.view = {  
@@ -75,7 +72,7 @@ function update() {
 
       if      (column.id == "proxyHost")     return proxy.getHost();
       else if (column.id == "proxyHTTPPort") return proxy.getHTTPPort();
-      else if (column.id == "proxySSLPort")  return proxy.getSSLPort();
+      else if (column.id == "proxyPrefetchPort")  return proxy.getPrefetchPort();
     },  
 
     getCellValue: function(row, col) {
@@ -83,7 +80,6 @@ function update() {
     },
 
     setCellValue: function(row, col, val) {
-      //      proxyManager.disableAllProxies()
       proxyManager.getProxyAtIndex(row).setEnabled(val == "true");
       update();
     },

@@ -1,6 +1,8 @@
+var constants = require('./constants').constants;
+
 var redis = require("redis"),
     userAgents = require('./useragents'),
-    client = redis.createClient();
+    client = redis.createClient(constants.redisPort, constants.redisHost);
 
 var IdentityProvider = function(){
 	this.BASE_POOL_SIZE = 30;

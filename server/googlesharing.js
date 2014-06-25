@@ -1,5 +1,4 @@
 var constants = require('./constants').constants;
-
 var restify = require('restify'),
   server = restify.createServer({
     name: 'googlesharing'
@@ -7,6 +6,12 @@ var restify = require('restify'),
     ,key:''
   }),
   IdentityProvider = require('./identityprovider').IdentityProvider;
+
+if (process.argv.length >= 3) {
+  if (parseInt(process.argv[2]) > 0) {
+    constants.identityPort = parseInt(process.argv[2]);
+  }
+}
 
 server.use(restify.acceptParser(server.acceptable));
 server.use(restify.bodyParser());

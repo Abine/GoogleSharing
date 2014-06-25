@@ -4,6 +4,10 @@ var redis = require("redis"),
     userAgents = require('./useragents'),
     client = redis.createClient(constants.redisPort, constants.redisHost);
 
+if (constants.redisAuth) {
+  client.auth(constants.redisAuth);
+}
+
 var IdentityProvider = function(){
 	this.BASE_POOL_SIZE = 30;
     // populate pool

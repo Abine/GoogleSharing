@@ -3,7 +3,7 @@
 
   constants = {
     proxyPort: '8080',
-    identityPort: '80',
+    identityPort: '3000',
     redisPort: '6379',
     redisHost: 'proxy-redis.abine.com'
   };
